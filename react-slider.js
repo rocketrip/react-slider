@@ -200,9 +200,6 @@
       // reused throughout the component to store results of iterations over `value`
       this.tempArray = value.slice();
 
-      // array for storing resize timeouts ids
-      this.pendingResizeTimeouts = [];
-
       var zIndices = [];
       for (var i = 0; i < value.length; i++) {
         value[i] = this._trimAlignValue(value[i], this.props);
@@ -266,48 +263,26 @@
       this._handleResize();
     },
 
-    componentWillUnmount: function () {
-      this._clearPendingResizeTimeouts();
-      window.removeEventListener('resize', this._handleResize);
-    },
-
     getValue: function () {
       return undoEnsureArray(this.state.value);
     },
 
     _handleResize: function () {
-      // setTimeout of 0 gives element enough time to have assumed its new size if it is being resized
-      var resizeTimeout = window.setTimeout(function() {
-        // drop this timeout from pendingResizeTimeouts to reduce memory usage
-        this.pendingResizeTimeouts.shift();
+      var slider = this.refs.slider;
+      var handle = this.refs.handle0;
+      var rect = slider.getBoundingClientRect();
 
-        var slider = this.refs.slider;
-        var handle = this.refs.handle0;
-        var rect = slider.getBoundingClientRect();
+      var size = this._sizeKey();
 
-        var size = this._sizeKey();
+      var sliderMax = rect[this._posMaxKey()];
+      var sliderMin = rect[this._posMinKey()];
 
-        var sliderMax = rect[this._posMaxKey()];
-        var sliderMin = rect[this._posMinKey()];
-
-        this.setState({
-          upperBound: slider[size] - handle[size],
-          sliderLength: Math.abs(sliderMax - sliderMin),
-          handleSize: handle[size],
-          sliderStart: this.props.invert ? sliderMax : sliderMin
-        });
-      }.bind(this), 0);
-
-      this.pendingResizeTimeouts.push(resizeTimeout);
-    },
-
-    // clear all pending timeouts to avoid error messages after unmounting
-    _clearPendingResizeTimeouts: function() {
-      do {
-        var nextTimeout = this.pendingResizeTimeouts.shift();
-
-        clearTimeout(nextTimeout);
-      } while (this.pendingResizeTimeouts.length);
+      this.setState({
+        upperBound: slider[size] - handle[size],
+        sliderLength: Math.abs(sliderMax - sliderMin),
+        handleSize: handle[size],
+        sliderStart: this.props.invert ? sliderMax : sliderMin
+      });
     },
 
     // calculates the offset of a handle in pixels based on its value.
@@ -663,20 +638,20 @@
 
     _renderHandle: function (style, child, i) {
       var className = this.props.handleClassName + ' ' +
-        (this.props.handleClassName + '-' + i) + ' ' +
-        (this.state.index === i ? this.props.handleActiveClassName : '');
+          (this.props.handleClassName + '-' + i) + ' ' +
+          (this.state.index === i ? this.props.handleActiveClassName : '');
 
       return (
-        React.createElement('div', {
-            ref: 'handle' + i,
-            key: 'handle' + i,
-            className: className,
-            style: style,
-            onMouseDown: this._createOnMouseDown(i),
-            onTouchStart: this._createOnTouchStart(i)
-          },
-          child
-        )
+          React.createElement('div', {
+                ref: 'handle' + i,
+                key: 'handle' + i,
+                className: className,
+                style: style,
+                onMouseDown: this._createOnMouseDown(i),
+                onTouchStart: this._createOnTouchStart(i)
+              },
+              child
+          )
       );
     },
 
@@ -704,12 +679,12 @@
 
     _renderBar: function (i, offsetFrom, offsetTo) {
       return (
-        React.createElement('div', {
-          key: 'bar' + i,
-          ref: 'bar' + i,
-          className: this.props.barClassName + ' ' + this.props.barClassName + '-' + i,
-          style: this._buildBarStyle(offsetFrom, this.state.upperBound - offsetTo)
-        })
+          React.createElement('div', {
+            key: 'bar' + i,
+            ref: 'bar' + i,
+            className: this.props.barClassName + ' ' + this.props.barClassName + '-' + i,
+            style: this._buildBarStyle(offsetFrom, this.state.upperBound - offsetTo)
+          })
       );
     },
 
@@ -774,16 +749,16 @@
       var handles = this._renderHandles(offset);
 
       return (
-        React.createElement('div', {
-            ref: 'slider',
-            style: {position: 'relative'},
-            className: props.className + (props.disabled ? ' disabled' : ''),
-            onMouseDown: this._onSliderMouseDown,
-            onClick: this._onSliderClick
-          },
-          bars,
-          handles
-        )
+          React.createElement('div', {
+                ref: 'slider',
+                style: {position: 'relative'},
+                className: props.className + (props.disabled ? ' disabled' : ''),
+                onMouseDown: this._onSliderMouseDown,
+                onClick: this._onSliderClick
+              },
+              bars,
+              handles
+          )
       );
     }
   });
