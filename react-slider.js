@@ -171,7 +171,17 @@
        *  Callback called when the the slider is clicked (handle or bars).
        *  Receives the value at the clicked position as argument.
        */
-      onSliderClick: React.PropTypes.func
+      onSliderClick: React.PropTypes.func,
+
+      /**
+       * Width of the slider (related to an issue when we are not getting correct numbers with clientWidth
+       */
+      sliderSize: React.PropTypes.number.isRequired,
+
+      /**
+       * Width of the handle (related to an issue when we are not getting correct numbers with clientWidth
+       */
+      handleSize: React.PropTypes.number.isRequired
     },
 
     getDefaultProps: function () {
@@ -269,18 +279,18 @@
 
     _handleResize: function () {
       var slider = this.refs.slider;
-      var handle = this.refs.handle0;
       var rect = slider.getBoundingClientRect();
-
-      var size = this._sizeKey();
 
       var sliderMax = rect[this._posMaxKey()];
       var sliderMin = rect[this._posMinKey()];
 
+      var sliderSize = this.props.sliderSize;
+      var handleSize = this.props.handleSize;
+
       this.setState({
-        upperBound: slider[size] - handle[size],
+        upperBound: sliderSize - handleSize,
         sliderLength: Math.abs(sliderMax - sliderMin),
-        handleSize: handle[size],
+        handleSize: handleSize,
         sliderStart: this.props.invert ? sliderMax : sliderMin
       });
     },
@@ -602,12 +612,6 @@
       var orientation = this.props.orientation;
       if (orientation === 'horizontal') return this.props.invert ? 'left' : 'right';
       if (orientation === 'vertical') return this.props.invert ? 'top' : 'bottom';
-    },
-
-    _sizeKey: function () {
-      var orientation = this.props.orientation;
-      if (orientation === 'horizontal') return 'clientWidth';
-      if (orientation === 'vertical') return 'clientHeight';
     },
 
     _trimAlignValue: function (val, props) {
