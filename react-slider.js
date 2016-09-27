@@ -289,7 +289,11 @@
 
       this.setState({
         upperBound: sliderSize - handleSize,
-        sliderLength: Math.abs(sliderMax - sliderMin),
+
+        // If an sliderMax and sliderMin have not yet been determined (there are zeros)
+        // then use sliderSize for calculating
+        sliderLength: Math.abs(sliderMax - sliderMin) || sliderSize,
+
         handleSize: handleSize,
         sliderStart: this.props.invert ? sliderMax : sliderMin
       });
